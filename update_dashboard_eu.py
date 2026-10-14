@@ -63,8 +63,8 @@ MAX_CHARS = 6000
 CHECKPOINT_EVERY = 50
 
 CONCEPTS = {
-    'inflation': {'kw': r'inflation|deflation|hyperinflation|price', 'concept': 'inflation rate', 'ma_main': 60},
-    'unemployment': {'kw': r'unemployment|employment|unemployed|job', 'concept': 'unemployment rate', 'ma_main': 90},
+    'inflation': {'kw': r'inflation|deflation|hyperinflation|price', 'concept': 'inflation rate', 'ma_main': 60, 'ma_band': [15, 30, 45, 60, 90, 120, 180]},
+    'unemployment': {'kw': r'unemployment|employment|unemployed|job', 'concept': 'unemployment rate', 'ma_main': 90, 'ma_band': [30, 45, 60, 90, 135, 180, 270]},
 }
 PROMPT = ("You are a forecaster and want to predict the future {concept} in Europe from textual documents. "
           "The following document will report sentences potentially referring to Europe: {text}. "
@@ -304,11 +304,11 @@ for cname, cfg in CONCEPTS.items():
     # ------------------------------------------------------------------------
     full = pd.concat([hist, daily[daily.index >= live_start]]).asfreq('D')
     full.to_csv(os.path.join(REPO_DIR, 'data', f'daily_{cname}{"_mock" if MOCK else ""}.csv'), header=['signal'], index_label='date')
-    var = pd.DataFrame({f'ma{w}': full.rolling(w, min_periods=int(np.ceil(0.8 * w))).mean().resample('ME').mean() for w in MA_SEQ})
+    var = pd.DataFrame({f'ma{w}': full.rolling(w, min_periods=int(np.ceil(0.8 * w))).mean().resample('ME').mean() for w in sorted(set(MA_SEQ) | set(cfg['ma_band']))})
     # check: months fully inside the paper data reproduce the paper files
     pm = pd.DataFrame({f'ma{w}': (R[w] / w).resample('ME').mean() for w in MA_SEQ})
     cm = pm.index[(pm.index >= pd.Timestamp('2011-01-31')) & (pm.index < paper_end.to_period('M').to_timestamp())]   # after the first full year of windows
-    print(f'monthly check vs paper files: max diff {float(np.nanmax(np.abs(var.loc[cm].values - pm.loc[cm].values))):.1e}')
+    print(f'monthly check vs paper files: max diff {float(np.nanmax(np.abs(var.loc[cm, pm.columns].values - pm.loc[cm].values))):.1e}')
     results[cname] = var
     meta_c[cname] = {'ma_main': cfg['ma_main'], 'paper_end': paper_end.strftime('%Y-%m-%d'), 'data_through': str(data_through.date()),
                      'n_pending': n_pending_live, 'factiva_days': len(fac_used),
@@ -365,8 +365,11 @@ out = {'meta': {'generated_at': datetime.now(timezone.utc).isoformat(timespec='s
 for cname, var in results.items():
     Vz = zs(var).reindex(months)
     nv = Vz.notna().sum(axis=1)
-    out[cname] = {'main': rd(Vz[f'ma{CONCEPTS[cname]["ma_main"]}']), 'p10': rd(Vz.quantile(0.10, axis=1).where(nv >= 3)),
-                  'p90': rd(Vz.quantile(0.90, axis=1).where(nv >= 3))}
+    # band: range across windows from about a quarter to three times the main one; it always contains the line
+    B = Vz[[f'ma{w}' for w in CONCEPTS[cname]['ma_band']]]
+    full_b = B.notna().all(axis=1)
+    out[cname] = {'main': rd(Vz[f'ma{CONCEPTS[cname]["ma_main"]}']), 'p10': rd(B.min(axis=1).where(full_b)),
+                  'p90': rd(B.max(axis=1).where(full_b)), 'band_windows': CONCEPTS[cname]['ma_band']}
 Mz = zs(macro).reindex(months) if macro.notna().any().any() else macro.reindex(months)
 M = macro.reindex(months)
 for k in macro:

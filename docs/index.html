@@ -63,21 +63,21 @@ footer p{margin:0 0 6px}
   <section>
     <h2>Inflation: RIS and HICP</h2>
     <p class="sub">Standardised units (z-scores over 2012M1–2023M12). HICP all items, euro area, annual rate of change (ECB).</p>
-    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, 10–90% across moving-average windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 60-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>HICP</span></div>
+    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, range across 15- to 180-day windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 60-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>HICP</span></div>
     <div class="chart" id="c-hicp"></div>
   </section>
 
   <section>
     <h2>Inflation: RIS and core HICP</h2>
     <p class="sub">Standardised units (z-scores over 2012M1–2023M12). HICP excluding energy, food, alcohol and tobacco, euro area, annual rate of change (ECB).</p>
-    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, 10–90% across moving-average windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 60-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>Core HICP</span></div>
+    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, range across 15- to 180-day windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 60-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>Core HICP</span></div>
     <div class="chart" id="c-core"></div>
   </section>
 
   <section>
     <h2>Unemployment: RIS and the unemployment rate</h2>
     <p class="sub">Standardised units (z-scores over 2012M1–2023M12). Euro area unemployment rate, seasonally adjusted (ECB). The RIS here signals unemployment going up or down.</p>
-    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, 10–90% across moving-average windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 90-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>Unemployment rate</span></div>
+    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, range across 30- to 270-day windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 90-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>Unemployment rate</span></div>
     <div class="chart" id="c-unemp"></div>
   </section>
 
@@ -143,7 +143,7 @@ function draw(id, rkey, key, name, unit){
     const gap = (C_.gap_months||[]).includes(M[i]) || (C_.factiva_months||[]).includes(M[i]);
     showTip(box, X(i)/W*box.clientWidth, Y(med[i]??inf[i]??0)/H*box.clientHeight, mlab(M[i])+(i>=li&&li>=0?' · live':'')+(gap?' · partial Reddit data':''), [
       {n:'RIS, '+C_.ma_main+'-day MA', v:f2(med[i]), c:css('--ris')},
-      {n:'RIS, 10–90% of windows', v: lo[i]==null?'–':f2(lo[i])+' to '+f2(hi[i]), c:css('--ris-band'), band:true},
+      {n:'RIS, range of windows', v: lo[i]==null?'–':f2(lo[i])+' to '+f2(hi[i]), c:css('--ris-band'), band:true},
       {n:name+' (z)', v:f2(inf[i]), c:css('--ink'), thick:true},
       {n:name+unit, v: pct[i]==null?'not yet released':pct[i].toFixed(1)+'%', c:css('--ink'), thick:true}]); };
   const off=()=>{ ch.setAttribute('opacity',0); d1.setAttribute('opacity',0); d2.setAttribute('opacity',0); hideTip(); };
@@ -162,7 +162,7 @@ fetch(URL_,{cache:'no-store'}).then(r=>{ if(!r.ok) throw 0; return r.json(); }).
   const CI=mt.concepts.inflation, CU=mt.concepts.unemployment;
   const fd=Math.max(CI.factiva_days,CU.factiva_days), fm=[...new Set([...CI.factiva_months,...CU.factiva_months])].sort();
   const gm=[...new Set([...CI.gap_months,...CU.gap_months])].sort();
-  [`RIS: r/europe submissions whose title mentions the paper's keywords (inflation: inflation, deflation, hyperinflation, price; unemployment: unemployment, employment, unemployed, job) and their first-level comments posted within a week are labelled UP, DOWN or NEUTRAL by an LLM with the prompt of the paper. A thread scores the average of its labels and counts as UP or DOWN beyond ±${mt.tau}; threads are summed by day of the submission. Lines show the paper's best specification (60-day backward moving average for inflation, 90-day for unemployment), averaged by month; the band spans windows from 30 to 365 days.`,
+  [`RIS: r/europe submissions whose title mentions the paper's keywords (inflation: inflation, deflation, hyperinflation, price; unemployment: unemployment, employment, unemployed, job) and their first-level comments posted within a week are labelled UP, DOWN or NEUTRAL by an LLM with the prompt of the paper. A thread scores the average of its labels and counts as UP or DOWN beyond ±${mt.tau}; threads are summed by day of the submission. Lines show the paper's best specification (60-day backward moving average for inflation, 90-day for unemployment), averaged by month; the band is the range across the neighbouring windows (15 to 180 days for inflation, 30 to 270 for unemployment).`,
    `Until ${mlab(CI.paper_end.slice(0,7))} the daily series are the paper's (Llama-3-70B). From then on they are built with the same prompt and rules by ${mt.model} (temperature ${mt.temperature}) on newly collected posts: ${(CI.n_live.submission+CU.n_live.submission).toLocaleString('en-US')} submissions and ${(CI.n_live.comment+CU.n_live.comment).toLocaleString('en-US')} comments so far. The latest month moves as comments arrive. Macro data: ECB Data Portal.`]
    .concat(fd ? [`On ${fd} days when the Reddit collection was down (${fm.map(mlab).join(', ')}) the daily signal comes from German, French, Italian and Spanish newspaper headlines (Factiva), labelled with the same prompt and rescaled to the usual daily number of r/europe threads.`] : [])
    .concat(gm.length ? [`Days with no data at all are left out of the moving averages (${gm.map(mlab).join(', ')}).`] : [])
