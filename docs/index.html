@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reddit Signals Europe</title>
+<meta name="description" content="Monthly Reddit Inflation Signal for Europe (r/europe, Llama-70B) against euro area HICP inflation, updated live.">
+<style>
+:root{
+  color-scheme: light;
+  --plane:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+  --ris:#2a78d6; --ris-band:rgba(42,120,214,0.16); --ft:#eb6834; --live:rgba(11,11,11,0.035); --border:rgba(11,11,11,0.10); --tip:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --plane:#1a1a19; --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835;
+    --ris:#3987e5; --ris-band:rgba(57,135,229,0.22); --ft:#d95926; --live:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.10); --tip:#242423;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:#1a1a19; --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835;
+  --ris:#3987e5; --ris-band:rgba(57,135,229,0.22); --ft:#d95926; --live:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.10); --tip:#242423;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--plane);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:44px 16px 56px}
+h1{font-size:24px;line-height:1.25;font-weight:600;margin:0 0 10px;letter-spacing:-0.01em}
+.lede{color:var(--ink-2);margin:0 0 6px;max-width:720px}
+.cite{color:var(--ink-2);font-size:14px;margin:0;max-width:760px}
+.cite i{color:var(--ink)}
+.meta{color:var(--muted);font-size:13px;margin-top:14px}
+section{margin-top:40px}
+h2{font-size:15px;font-weight:600;margin:0 0 2px}
+.sub{color:var(--ink-2);font-size:13px;margin:0 0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--ink-2);margin:0 0 6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.k-line{display:inline-block;width:16px;height:2px;border-radius:1px}
+.k-band{display:inline-block;width:12px;height:10px;border-radius:2px}
+.chart{position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--tip);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.12);white-space:nowrap;opacity:0;z-index:5}
+.tip .h{color:var(--muted);margin-bottom:4px}
+.tip .r{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.tip .r span{display:inline-flex;gap:6px;align-items:center;color:var(--ink-2)}
+.tip b{font-variant-numeric:tabular-nums;font-weight:600}
+footer{margin-top:40px;color:var(--muted);font-size:13px;line-height:1.6;max-width:760px}
+footer p{margin:0 0 6px}
+.note{font-size:13px;color:var(--ink-2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-top:14px}
+.hidden{display:none}
+@media (max-width:640px){ main{padding-top:28px} h1{font-size:21px} }
+</style>
+</head>
+<body>
+<main>
+  <h1>Reddit Signals · Europe</h1>
+  <p class="lede">Monthly Reddit signals (RIS) from Llama-3.3-70B labels of inflation and unemployment discussions on r/europe, against euro area HICP inflation and the unemployment rate. The shaded period extends the paper's data in real time.</p>
+  <p class="cite">Boss, K., Longo, L. and Onorante, L. <i>Nowcasting the euro area with social media data.</i> <a href="https://arxiv.org/abs/2506.10546" style="color:inherit">arXiv:2506.10546</a>.</p>
+  <div class="meta" id="meta">Loading…</div>
+  <div class="note hidden" id="mock">Test build: labels come from a keyword stand-in, not Llama-70B.</div>
+
+  <section>
+    <h2>Inflation: RIS and HICP</h2>
+    <p class="sub">Standardised units (z-scores over 2012M1–2023M12). HICP all items, euro area, annual rate of change (ECB).</p>
+    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, 10–90% across moving-average windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 60-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>HICP</span></div>
+    <div class="chart" id="c-hicp"></div>
+  </section>
+
+  <section>
+    <h2>Inflation: RIS and core HICP</h2>
+    <p class="sub">Standardised units (z-scores over 2012M1–2023M12). HICP excluding energy, food, alcohol and tobacco, euro area, annual rate of change (ECB).</p>
+    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, 10–90% across moving-average windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 60-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>Core HICP</span></div>
+    <div class="chart" id="c-core"></div>
+  </section>
+
+  <section>
+    <h2>Unemployment: RIS and the unemployment rate</h2>
+    <p class="sub">Standardised units (z-scores over 2012M1–2023M12). Euro area unemployment rate, seasonally adjusted (ECB). The RIS here signals unemployment going up or down.</p>
+    <div class="legend"><span><i class="k-band" style="background:var(--ris-band)"></i>RIS, 10–90% across moving-average windows</span><span><i class="k-line" style="background:var(--ris)"></i>RIS, 90-day moving average</span><span><i class="k-line" style="background:var(--ink);height:3px"></i>Unemployment rate</span></div>
+    <div class="chart" id="c-unemp"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+<div class="tip" id="tip"></div>
+
+<script>
+(function(){
+const q = new URLSearchParams(location.search);
+const URL_ = 'data/' + (q.get('data') || 'dashboard.json').replace(/[^a-zA-Z0-9_.-]/g,'');
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const S = (t,a={}) => { const e=document.createElementNS('http://www.w3.org/2000/svg',t); for(const k in a) e.setAttribute(k,a[k]); return e; };
+const E = (t,a={},x) => { const e=document.createElement(t); for(const k in a) e.setAttribute(k,a[k]); if(x!=null) e.textContent=x; return e; };
+const mlab = ym => MON[+ym.slice(5,7)-1]+' '+ym.slice(0,4);
+const f2 = v => v==null ? '–' : (v<0?'−':'')+Math.abs(v).toFixed(2);
+let D;
+
+function ticks(lo,hi){ const span=hi-lo, raw=span/5, mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  const step=[1,2,2.5,5,10].map(m=>m*mag).find(s=>span/s<=5); const t=[];
+  for(let v=Math.floor(lo/step)*step; v<=Math.ceil(hi/step)*step+1e-9; v+=step) t.push(+v.toFixed(6)); return t; }
+
+const tip = document.getElementById('tip');
+function showTip(box,x,y,head,rows){
+  tip.replaceChildren(E('div',{class:'h'},head));
+  rows.forEach(r=>{ const row=E('div',{class:'r'}), s=E('span'), k=E('i',{class:r.band?'k-band':'k-line'}); k.style.background=r.c; if(r.thick) k.style.height='3px';
+    s.append(k, document.createTextNode(r.n)); row.append(s, E('b',{},r.v)); tip.appendChild(row); });
+  const b=box.getBoundingClientRect(); tip.style.opacity=1;
+  let L=b.left+scrollX+x+14; if(L+tip.offsetWidth>scrollX+document.documentElement.clientWidth-8) L=b.left+scrollX+x-tip.offsetWidth-14;
+  tip.style.left=L+'px'; tip.style.top=(b.top+scrollY+Math.max(0,y-tip.offsetHeight/2))+'px';
+}
+const hideTip=()=>tip.style.opacity=0;
+
+function draw(id, rkey, key, name, unit){
+  const box=document.getElementById(id); box.replaceChildren();
+  const M=D.months, n=M.length, R_=D[rkey], C_=D.meta.concepts[rkey], med=R_.main, lo=R_.p10, hi=R_.p90, inf=D['macro_'+key].z, pct=D['macro_'+key].level, ft=M.map(()=>null);
+  const W=box.clientWidth||900, H=Math.max(260,Math.min(380,W*0.42)), m={l:36,r:12,t:10,b:28}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const all=[...lo,...hi,...med,...inf,...ft].filter(v=>v!=null);
+  const T=ticks(Math.min(...all),Math.max(...all)), y0=T[0], y1=T[T.length-1];
+  const X=i=>m.l+i/(n-1)*iw, Y=v=>m.t+ih-(v-y0)/(y1-y0)*ih;
+  const svg=S('svg',{viewBox:`0 0 ${W} ${H}`,height:H,role:'img','aria-label':`RIS and ${name}, standardised`});
+  // live extension
+  const li=M.findIndex(m=>m>C_.paper_end.slice(0,7));
+  if(li>=0){ const xa=X(li)-iw/(n-1)/2; svg.appendChild(S('rect',{x:xa,y:m.t,width:W-m.r-xa,height:ih,fill:css('--live')}));
+    const t=S('text',{x:W-m.r-6,y:m.t+14,'text-anchor':'end','font-size':11,fill:css('--muted')}); t.textContent='Live'; svg.appendChild(t); }
+  T.forEach(v=>{ svg.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),stroke:v===0?css('--axis'):css('--grid'),'stroke-width':1}));
+    const t=S('text',{x:m.l-8,y:Y(v)+4,'text-anchor':'end','font-size':11,fill:css('--muted')}); t.textContent=(v<0?'−':'')+Math.abs(v); svg.appendChild(t); });
+  const step = W<520 ? 4 : 2;
+  M.forEach((ym,i)=>{ const y=+ym.slice(0,4); if(ym.slice(5)==='01' && y%step===0){ const t=S('text',{x:X(i),y:H-8,'text-anchor':'middle','font-size':11,fill:css('--muted')}); t.textContent=y; svg.appendChild(t);} });
+  // band
+  let seg=[]; const segs=[]; for(let i=0;i<n;i++){ if(lo[i]!=null&&hi[i]!=null) seg.push(i); else if(seg.length){segs.push(seg);seg=[];} } if(seg.length) segs.push(seg);
+  segs.forEach(s=>{ const d='M'+s.map(i=>X(i)+','+Y(hi[i])).join(' L')+' L'+s.slice().reverse().map(i=>X(i)+','+Y(lo[i])).join(' L')+'Z'; svg.appendChild(S('path',{d,fill:css('--ris-band')})); });
+  const line=(arr,col,w)=>{ let d='',pen=false; arr.forEach((v,i)=>{ if(v==null){pen=false;return;} d+=(pen?' L':' M')+X(i)+','+Y(v); pen=true; });
+    svg.appendChild(S('path',{d,fill:'none',stroke:col,'stroke-width':w,'stroke-linejoin':'round','stroke-linecap':'round'})); };
+  line(med,css('--ris'),2); line(ft,css('--ft'),2); line(inf,css('--ink'),2.5);
+  // hover
+  const ch=S('line',{y1:m.t,y2:m.t+ih,stroke:css('--axis'),opacity:0}); svg.appendChild(ch);
+  const d1=S('circle',{r:4,fill:css('--ris'),stroke:css('--plane'),'stroke-width':2,opacity:0}), d2=S('circle',{r:4,fill:css('--ink'),stroke:css('--plane'),'stroke-width':2,opacity:0}); svg.append(d1,d2);
+  const hit=S('rect',{x:m.l,y:m.t,width:iw,height:ih,fill:'transparent',tabindex:0}); svg.appendChild(hit);
+  const at=i=>{ ch.setAttribute('x1',X(i)); ch.setAttribute('x2',X(i)); ch.setAttribute('opacity',1);
+    [[d1,med[i]],[d2,inf[i]]].forEach(([c,v])=>{ if(v==null) c.setAttribute('opacity',0); else { c.setAttribute('cx',X(i)); c.setAttribute('cy',Y(v)); c.setAttribute('opacity',1);} });
+    const gap = (C_.gap_months||[]).includes(M[i]) || (C_.factiva_months||[]).includes(M[i]);
+    showTip(box, X(i)/W*box.clientWidth, Y(med[i]??inf[i]??0)/H*box.clientHeight, mlab(M[i])+(i>=li&&li>=0?' · live':'')+(gap?' · partial Reddit data':''), [
+      {n:'RIS, '+C_.ma_main+'-day MA', v:f2(med[i]), c:css('--ris')},
+      {n:'RIS, 10–90% of windows', v: lo[i]==null?'–':f2(lo[i])+' to '+f2(hi[i]), c:css('--ris-band'), band:true},
+      {n:name+' (z)', v:f2(inf[i]), c:css('--ink'), thick:true},
+      {n:name+unit, v: pct[i]==null?'not yet released':pct[i].toFixed(1)+'%', c:css('--ink'), thick:true}]); };
+  const off=()=>{ ch.setAttribute('opacity',0); d1.setAttribute('opacity',0); d2.setAttribute('opacity',0); hideTip(); };
+  hit.addEventListener('pointermove',e=>{ const b=svg.getBoundingClientRect(); at(Math.max(0,Math.min(n-1,Math.round(((e.clientX-b.left)/b.width*W-m.l)/iw*(n-1))))); });
+  hit.addEventListener('pointerleave',off); hit.addEventListener('blur',off); hit.addEventListener('focus',()=>at(n-1));
+  box.appendChild(svg);
+}
+
+function render(){ draw('c-hicp','inflation','hicp','HICP',', y/y'); draw('c-core','inflation','core','Core HICP',', y/y'); draw('c-unemp','unemployment','unemployment','Unemployment rate',''); }
+
+fetch(URL_,{cache:'no-store'}).then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(d=>{
+  D=d; const mt=d.meta;
+  if(mt.mock) document.getElementById('mock').classList.remove('hidden');
+  document.getElementById('meta').textContent = `Updated ${new Date(mt.generated_at).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})} · Reddit data through ${mt.concepts.inflation.data_through} · HICP through ${mt.macro_last.hicp?mlab(mt.macro_last.hicp):'–'}, unemployment through ${mt.macro_last.unemployment?mlab(mt.macro_last.unemployment):'–'}`;
+  const f=document.getElementById('foot');
+  const CI=mt.concepts.inflation, CU=mt.concepts.unemployment;
+  const fd=Math.max(CI.factiva_days,CU.factiva_days), fm=[...new Set([...CI.factiva_months,...CU.factiva_months])].sort();
+  const gm=[...new Set([...CI.gap_months,...CU.gap_months])].sort();
+  [`RIS: r/europe submissions whose title mentions the paper's keywords (inflation: inflation, deflation, hyperinflation, price; unemployment: unemployment, employment, unemployed, job) and their first-level comments posted within a week are labelled UP, DOWN or NEUTRAL by an LLM with the prompt of the paper. A thread scores the average of its labels and counts as UP or DOWN beyond ±${mt.tau}; threads are summed by day of the submission. Lines show the paper's best specification (60-day backward moving average for inflation, 90-day for unemployment), averaged by month; the band spans windows from 30 to 365 days.`,
+   `Until ${mlab(CI.paper_end.slice(0,7))} the daily series are the paper's (Llama-3-70B). From then on they are built with the same prompt and rules by ${mt.model} (temperature ${mt.temperature}) on newly collected posts: ${(CI.n_live.submission+CU.n_live.submission).toLocaleString('en-US')} submissions and ${(CI.n_live.comment+CU.n_live.comment).toLocaleString('en-US')} comments so far. The latest month moves as comments arrive. Macro data: ECB Data Portal.`]
+   .concat(fd ? [`On ${fd} days when the Reddit collection was down (${fm.map(mlab).join(', ')}) the daily signal comes from German, French, Italian and Spanish newspaper headlines (Factiva), labelled with the same prompt and rescaled to the usual daily number of r/europe threads.`] : [])
+   .concat(gm.length ? [`Days with no data at all are left out of the moving averages (${gm.map(mlab).join(', ')}).`] : [])
+   .concat((CI.n_pending+CU.n_pending) ? [`Labelling in progress: ${(CI.n_pending+CU.n_pending).toLocaleString('en-US')} posts still to label.`] : [])
+   .forEach(t=>f.appendChild(E('p',{},t)));
+  render(); let rt; addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,150);});
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
+}).catch(()=>{ document.getElementById('meta').textContent='No data published yet.'; });
+})();
+</script>
+</body>
+</html>

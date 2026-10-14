@@ -1,0 +1,9 @@
+*.jwt
+.env
+.update.lock/
+logs/
+labels_mock/
+data/*_mock.csv
+docs/data/dashboard_mock.json
+__pycache__/
+.DS_Store
