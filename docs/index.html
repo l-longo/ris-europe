@@ -58,6 +58,7 @@ footer p{margin:0 0 6px}
   <p class="lede">Monthly Reddit signals (RIS) from Llama-3.3-70B labels of inflation and unemployment discussions on r/europe, against euro area HICP inflation and the unemployment rate. The shaded period extends the paper's data in real time.</p>
   <p class="cite">Boss, K., Longo, L. and Onorante, L. <i>Nowcasting the euro area with social media data.</i> <a href="https://arxiv.org/abs/2506.10546" style="color:inherit">arXiv:2506.10546</a>.</p>
   <div class="meta" id="meta">Loading…</div>
+  <div class="meta"><a id="dl" href="#" style="color:inherit">Download the monthly series (CSV)</a></div>
   <div class="note hidden" id="mock">Test build: labels come from a keyword stand-in, not Llama-70B.</div>
 
   <section>
@@ -158,6 +159,18 @@ fetch(URL_,{cache:'no-store'}).then(r=>{ if(!r.ok) throw 0; return r.json(); }).
   D=d; const mt=d.meta;
   if(mt.mock) document.getElementById('mock').classList.remove('hidden');
   document.getElementById('meta').textContent = `Updated ${new Date(mt.generated_at).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})} · Reddit data through ${mt.concepts.inflation.data_through} · HICP through ${mt.macro_last.hicp?mlab(mt.macro_last.hicp):'–'}, unemployment through ${mt.macro_last.unemployment?mlab(mt.macro_last.unemployment):'–'}`;
+  document.getElementById('dl').addEventListener('click', e=>{
+    e.preventDefault();
+    const cols=[
+    ['ris_inflation_ma60_z', D.inflation.main], ['ris_inflation_band_low_z', D.inflation.p10], ['ris_inflation_band_high_z', D.inflation.p90],
+    ['ris_unemployment_ma90_z', D.unemployment.main], ['ris_unemployment_band_low_z', D.unemployment.p10], ['ris_unemployment_band_high_z', D.unemployment.p90],
+    ['hicp_yoy_pct', D.macro_hicp.level], ['hicp_z', D.macro_hicp.z], ['core_hicp_yoy_pct', D.macro_core.level], ['core_hicp_z', D.macro_core.z],
+    ['unemployment_rate_pct', D.macro_unemployment.level], ['unemployment_rate_z', D.macro_unemployment.z]];
+    const lines=[['month', ...cols.map(c=>c[0])].join(',')].concat(D.months.map((m,i)=>[m, ...cols.map(c=>c[1]&&c[1][i]!=null?c[1][i]:'')].join(',')));
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([lines.join('\n')+'\n'],{type:'text/csv'}));
+    a.download='reddit_signals_europe.csv'; document.body.appendChild(a); a.click(); a.remove();
+  });
   const f=document.getElementById('foot');
   const CI=mt.concepts.inflation, CU=mt.concepts.unemployment;
   const fd=Math.max(CI.factiva_days,CU.factiva_days), fm=[...new Set([...CI.factiva_months,...CU.factiva_months])].sort();
